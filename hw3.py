@@ -1,27 +1,32 @@
+from collections import Counter
+
+
 class CountVectorizer:
     """Convert a text corpus to a matrix of words counts."""
 
     def __init__(self):
-        self.feature_names = []
+        self.feature_names = {}
 
     def get_feature_names(self) -> list[str]:
         """
         Return a list of unique words from text corpus
         :return: list of words
         """
-        return self.feature_names
+        return list(self.feature_names.keys())
 
-    def set_feature_names(self, corpus: list[str]) -> list[str]:
+    def set_feature_names(self, corpus: list[str]) -> dict[str, int]:
         """
         Retrieves a list of unique words from text corpus
         :param corpus: list of strings
         :return: list of words
         """
+        idx = 0
         for sentence in corpus:
             sentence = sentence.lower().split(' ')
             for word in sentence:
-                if word not in self.feature_names:
-                    self.feature_names.append(word)
+                if word not in self.feature_names.keys():
+                    self.feature_names[word] = idx
+                    idx += 1
         return self.feature_names
 
     def fit_transform(self, corpus: list[str]) -> list[list[int]]:
@@ -32,11 +37,13 @@ class CountVectorizer:
         :return: count matrix for corpus
         """
         matrix = []
+        self.set_feature_names(corpus)
         for sentence in corpus:
             sentence = sentence.lower().split(' ')
-            feature_freq = []
-            for feature in self.set_feature_names(corpus):
-                feature_freq.append(sentence.count(feature))
+            feature_freq = [0] * len(self.feature_names)
+            cnt = Counter(sentence)
+            for k in cnt.keys():
+                feature_freq[self.feature_names[k]] = cnt[k]
             matrix.append(feature_freq)
         return matrix
 
